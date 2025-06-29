@@ -21,3 +21,64 @@
 .black {
     background-color: #b58863;
 }
+
+const chessboard = document.getElementById('chessboard');
+
+function renderBoard() {
+    chessboard.innerHTML = '';
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement('div');
+            square.classList.add('square');
+            square.classList.add((row + col) % 2 === 0 ? 'white' : 'black');
+            square.dataset.row = row;
+            square.dataset.col = col;
+            
+            const piece = board[row][col];
+            if (piece) {
+                square.textContent = pieceToUnicode[piece];
+            }
+            
+            chessboard.appendChild(square);
+        }
+    }
+}
+
+renderBoard();
+
+function isValidPawnMove(board, fromRow, fromCol, toRow, toCol) {
+    const piece = board[fromRow][fromCol];
+    const targetPiece = board[toRow][toCol];
+    
+    // Direction: white moves up (decreasing row), black moves down (increasing row)
+    const direction = piece === 'P' ? -1 : 1;
+    
+    // Forward move
+    if (fromCol === toCol) {
+        // One step forward
+        if (toRow === fromRow + direction && !targetPiece) {
+            return true;
+        }
+        // Two steps from starting row
+        if ( (piece === 'P' && fromRow === 6 && toRow === 4 && !board[5][fromCol] && !targetPiece) ||
+             (piece === 'p' && fromRow === 1 && toRow === 3 && !board[2][fromCol] && !targetPiece) ) {
+            return true;
+        }
+    }
+    // Capture diagonally
+    else if (Math.abs(fromCol - toCol) === 1 && toRow === fromRow + direction) {
+        if (targetPiece && (piece === 'P' ? isBlack(targetPiece) : isWhite(targetPiece))) {
+            return true;
+        }
+        // TODO: en passant
+    }
+    return false;
+}
+
+function isWhite(piece) {
+    return piece === piece.toUpperCase();
+}
+
+function isBlack(piece) {
+    return piece === piece.toLowerCase();
+}
